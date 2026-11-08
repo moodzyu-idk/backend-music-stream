@@ -1,6 +1,6 @@
-const express = require('express');
-const cors = require('cors');
-const { search, getStream } = require('musicstream-sdk');
+import express from 'express';
+import cors from 'cors';
+import { search, getStream } from 'musicstream-sdk';
 
 const app = express();
 app.use(cors());
@@ -11,10 +11,7 @@ app.get('/api/search', async (req, res) => {
     if (!query) return res.status(400).json({ error: "Query kosong" });
 
     try {
-        // Nyari lagu pake musicstream-sdk
         const results = await search(query);
-        
-        // Format biar sesuai sama website Moonsic
         const tracks = results.slice(0, 15).map(track => ({
             id: track.id || track.videoId,
             title: track.title,
@@ -22,22 +19,19 @@ app.get('/api/search', async (req, res) => {
             thumbnail: track.thumbnail || track.thumbnails?.[0]?.url,
             duration: track.duration
         }));
-        
         res.json({ status: true, data: tracks });
     } catch (error) {
         res.status(500).json({ status: false, error: error.message });
     }
 });
 
-// Endpoint buat dapetin link audio (MP3)
+// Endpoint buat dapetin link audio
 app.get('/api/stream', async (req, res) => {
     const videoId = req.query.id;
     if (!videoId) return res.status(400).json({ error: "ID kosong" });
 
     try {
-        // Ambil stream URL
         const streamInfo = await getStream(videoId);
-        
         if (streamInfo && streamInfo.streamUrl) {
             res.json({ status: true, audioUrl: streamInfo.streamUrl });
         } else {
@@ -48,6 +42,5 @@ app.get('/api/stream', async (req, res) => {
     }
 });
 
-// Port dinamis (Render biasanya ngasih port lewat env)
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Backend jalan di port ${PORT}`));
