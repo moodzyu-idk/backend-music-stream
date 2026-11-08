@@ -1,9 +1,12 @@
 import express from 'express';
 import cors from 'cors';
-import { search, getStream } from 'musicstream-sdk';
+import { MusicKit } from 'musicstream-sdk';
 
 const app = express();
 app.use(cors());
+
+// Bikin instance MusicKit dulu
+const mk = new MusicKit();
 
 // Endpoint buat nyari lagu
 app.get('/api/search', async (req, res) => {
@@ -11,14 +14,17 @@ app.get('/api/search', async (req, res) => {
     if (!query) return res.status(400).json({ error: "Query kosong" });
 
     try {
-        const results = await search(query);
-        const tracks = results.slice(0, 15).map(track => ({
-            id: track.id || track.videoId,
+        const results = await mk.search(query);
+        const songs = results.songs || [];
+        
+        const tracks = songs.slice(0, 15).map(track => ({
+            id: track.videoId,
             title: track.title,
             artist: track.artists ? track.artists[0].name : (track.author || "Unknown"),
-            thumbnail: track.thumbnail || track.thumbnails?.[0]?.url,
+            thumbnail: track.thumbnails ? track.thumbnails[0].url : "",
             duration: track.duration
         }));
+        
         res.json({ status: true, data: tracks });
     } catch (error) {
         res.status(500).json({ status: false, error: error.message });
@@ -31,9 +37,11 @@ app.get('/api/stream', async (req, res) => {
     if (!videoId) return res.status(400).json({ error: "ID kosong" });
 
     try {
-        const streamInfo = await getStream(videoId);
-        if (streamInfo && streamInfo.streamUrl) {
-            res.json({ status: true, audioUrl: streamInfo.streamUrl });
+        // Panggil method getStream dari instance 'mk'
+        const streamInfo = await mk.getStream(videoId);
+        
+        if (streamInfo && streamInfo.url) {
+            res.json({ status: true, audioUrl: streamInfo.url });
         } else {
             res.status(404).json({ status: false, error: "Audio tidak ditemukan" });
         }
