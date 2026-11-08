@@ -1,4 +1,4 @@
-FROM node:20-slim
+FROM node:22-slim
 
 # Install dependencies yang dibutuhin (Python, ffmpeg, yt-dlp)
 RUN apt-get update && apt-get install -y \
