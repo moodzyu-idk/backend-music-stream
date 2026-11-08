@@ -1,30 +1,29 @@
 FROM node:22-slim
 
-# Install dependensi sistem, termasuk ca-certificates biar curl nggak error
+# Install python3, pip, ffmpeg, ca-certificates, dan unzip (buat Deno)
 RUN apt-get update && apt-get install -y \
     ca-certificates \
     python3 \
+    python3-pip \
     ffmpeg \
     curl \
-    && curl -L https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp -o /usr/local/bin/yt-dlp \
-    && chmod a+rx /usr/local/bin/yt-dlp \
-    && apt-get clean \
+    unzip \
     && rm -rf /var/lib/apt/lists/*
 
-# Set working directory
+# Install Deno (JavaScript Runtime buat yt-dlp)
+RUN curl -fsSL https://deno.land/install.sh | sh
+ENV DENO_INSTALL="/root/.deno"
+ENV PATH="$DENO_INSTALL/bin:$PATH"
+
+# Install yt-dlp lewat pip
+RUN pip3 install --break-system-packages yt-dlp
+
 WORKDIR /app
 
-# Copy file package.json dan package-lock.json
 COPY package*.json ./
-
-# Install dependencies Node.js
 RUN npm install
 
-# Copy semua file project
 COPY . .
 
-# Expose port (SnapDeploy udah otomatis deteksi port 3000)
 EXPOSE 3000
-
-# Jalanin server
 CMD ["node", "server.js"]
