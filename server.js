@@ -38,16 +38,28 @@ app.get('/api/stream', async (req, res) => {
     const videoId = req.query.id;
     if (!videoId) return res.status(400).json({ error: "ID kosong" });
 
+    console.log(`\n[API] =====================================`);
+    console.log(`[API] Menerima request stream untuk ID: ${videoId}`);
+    console.log(`[API] Mulai memanggil yt-dlp...`);
+
     try {
         // Panggil method getStream dari instance 'mk'
         const streamInfo = await mk.getStream(videoId);
         
+        console.log(`[API] yt-dlp selesai dipanggil!`);
+
         if (streamInfo && streamInfo.url) {
+            console.log(`[API] SUKSES! Dapet link audio.`);
+            console.log(`[API] =====================================\n`);
             res.json({ status: true, audioUrl: streamInfo.url });
         } else {
+            console.log(`[API] GAGAL! Stream info kosong.`);
+            console.log(`[API] =====================================\n`);
             res.status(404).json({ status: false, error: "Audio tidak ditemukan" });
         }
     } catch (error) {
+        console.log(`[API] yt-dlp ERROR: ${error.message}`);
+        console.log(`[API] =====================================\n`);
         res.status(500).json({ status: false, error: error.message });
     }
 });
