@@ -16,7 +16,7 @@ ENV DENO_INSTALL="/root/.deno"
 ENV PATH="$DENO_INSTALL/bin:$PATH"
 
 # Install yt-dlp lewat pip
-RUN pip3 install --break-system-packages yt-dlp
+RUN pip3 install --break-system-packages --pre yt-dlp
 
 WORKDIR /app
 
