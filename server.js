@@ -5,8 +5,10 @@ import { MusicKit } from 'musicstream-sdk';
 const app = express();
 app.use(cors());
 
-// Bikin instance MusicKit dulu
-const mk = new MusicKit();
+// Inisialisasi MusicKit dengan Cookies
+const mk = new MusicKit({
+    cookiesPath: '/app/cookies.txt' // Path ke file cookies.txt di dalam Docker
+});
 
 // Endpoint buat nyari lagu
 app.get('/api/search', async (req, res) => {
